@@ -1,0 +1,28 @@
+---
+/**
+ * Horizontal rhythm primitive: caps width and applies the responsive gutter.
+ *
+ * Every piece of page content goes through this, so the gutter is defined in
+ * exactly one place (`--spacing-gutter`) instead of being re-typed as a utility
+ * string on every section.
+ */
+interface Props {
+  /** Lets a Container double as the semantic wrapper, avoiding a nested div. */
+  as?: 'div' | 'section' | 'header' | 'footer' | 'nav' | 'main';
+  /** `narrow` suits prose; `wide` suits card grids. */
+  size?: 'narrow' | 'default' | 'wide';
+  class?: string;
+}
+
+const { as: Tag = 'div', size = 'default', class: className } = Astro.props;
+
+const SIZES: Record<NonNullable<Props['size']>, string> = {
+  narrow: 'max-w-3xl',
+  default: 'max-w-page',
+  wide: 'max-w-wide',
+};
+---
+
+<Tag class:list={['mx-auto w-full px-gutter', SIZES[size], className]}>
+  <slot />
+</Tag>

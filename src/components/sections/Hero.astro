@@ -1,0 +1,121 @@
+---
+/**
+ * Hero: oversized headline, keyword rail, and a full-bleed wordmark with a
+ * card overlapping it.
+ *
+ * Responsive strategy for the overlap — the card is in normal flow on small
+ * screens (below the wordmark, where there is simply no room to layer) and
+ * only becomes absolutely positioned from `md` up. That keeps the dramatic
+ * layered look on desktop without it collapsing into an unreadable pile on a
+ * phone.
+ */
+import Container from '../ui/Container.astro';
+import Button from '../ui/Button.astro';
+import Pill from '../ui/Pill.astro';
+import KeywordRail from '../ui/KeywordRail.astro';
+import Wordmark from '../ui/Wordmark.astro';
+import { HERO, HERO_STATS } from '../../config/content';
+---
+
+<section
+  id="top"
+  data-surface="light"
+  aria-labelledby="hero-title"
+  class="relative overflow-hidden bg-surface pt-28 pb-16 text-content md:pt-36 md:pb-24"
+>
+  <!-- Decorative wash. Hidden from assistive tech; `motion-safe` keeps the
+       drift off for users who asked for reduced motion. -->
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+    <div
+      class="absolute -top-24 -left-24 size-[28rem] rounded-full bg-accent/20 blur-3xl motion-safe:animate-float"
+    >
+    </div>
+    <div
+      class="absolute -top-10 -right-32 size-[24rem] rounded-full bg-accent/10 blur-3xl motion-safe:animate-float-slow"
+    >
+    </div>
+  </div>
+
+  <Container class="relative">
+    <p
+      data-reveal
+      class="max-w-md text-lead font-medium text-content-muted"
+    >
+      {HERO.eyebrow}
+    </p>
+
+    <h1
+      id="hero-title"
+      class="mt-6 text-hero font-black uppercase"
+    >
+      <span data-reveal class="block" style="--reveal-delay:60ms">
+        {HERO.title}
+      </span>
+      <span
+        data-reveal
+        class="block text-accent"
+        style="--reveal-delay:140ms"
+      >
+        {HERO.titleAccent}
+      </span>
+    </h1>
+
+    <KeywordRail items={HERO.keywords} bordered class="mt-10" />
+  </Container>
+
+  <!-- Wordmark + overlapping card -->
+  <div class="relative mt-12 md:mt-20">
+    <Wordmark text={HERO.wordmark} class="px-2" />
+
+    <div
+      class="mt-8 flex justify-center px-gutter md:absolute md:inset-x-0 md:top-1/2 md:mt-0 md:-translate-y-1/2"
+    >
+      <article
+        data-reveal
+        style="--reveal-delay:200ms"
+        class="group w-full max-w-sm rounded-3xl bg-accent p-6 text-accent-contrast shadow-accent transition-transform duration-500 ease-out-soft motion-safe:hover:-translate-y-1.5"
+      >
+        <Pill tone="surface">{HERO.card.badge}</Pill>
+
+        <p class="mt-8 text-2xl font-black tracking-tight uppercase">
+          {HERO.card.name}
+        </p>
+        <p class="mt-1 text-sm font-medium opacity-80">{HERO.card.role}</p>
+
+        <Button
+          href={HERO.card.cta.href}
+          variant="contrast"
+          icon="arrow-right"
+          class="mt-6 w-full"
+        >
+          {HERO.card.cta.label}
+        </Button>
+      </article>
+    </div>
+  </div>
+
+  <!-- Proof points -->
+  <Container class="relative mt-14 md:mt-24">
+    <dl class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      {
+        HERO_STATS.map((stat, i) => (
+          <div
+            data-reveal
+            style={`--reveal-delay:${i * 100}ms`}
+            class="group rounded-2xl border border-edge p-6 transition-colors duration-300 hover:border-accent"
+          >
+            <dt class="sr-only">{stat.label}</dt>
+            <dd>
+              <span class="block text-h2 font-black text-accent">
+                {stat.value}
+              </span>
+              <span class="mt-1 block text-sm font-semibold text-content-muted">
+                {stat.label}
+              </span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Container>
+</section>

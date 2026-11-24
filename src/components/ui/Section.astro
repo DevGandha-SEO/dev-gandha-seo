@@ -1,0 +1,48 @@
+---
+/**
+ * Vertical rhythm primitive + surface context carrier.
+ *
+ * `surface` writes a `data-surface` attribute, which remaps the semantic
+ * colour variables for the entire subtree (see global.css). That is why no
+ * component below this ever needs to know what colour it is sitting on.
+ */
+import Container from './Container.astro';
+import type { Surface } from '../../types';
+
+interface Props {
+  id?: string;
+  surface?: Surface;
+  /** Set false to supply your own Container — e.g. for a full-bleed child. */
+  contained?: boolean;
+  containerSize?: 'narrow' | 'default' | 'wide';
+  /** id of the heading that names this landmark, for screen readers. */
+  labelledby?: string;
+  class?: string;
+}
+
+const {
+  id,
+  surface = 'light',
+  contained = true,
+  containerSize = 'default',
+  labelledby,
+  class: className,
+} = Astro.props;
+---
+
+<section
+  id={id}
+  data-surface={surface}
+  aria-labelledby={labelledby}
+  class:list={['relative bg-surface py-section text-content', className]}
+>
+  {
+    contained ? (
+      <Container size={containerSize}>
+        <slot />
+      </Container>
+    ) : (
+      <slot />
+    )
+  }
+</section>

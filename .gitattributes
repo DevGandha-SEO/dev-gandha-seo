@@ -1,0 +1,14 @@
+# Normalise line endings to LF in the repository.
+# Without this, Windows checkouts commit CRLF and every file shows as fully
+# rewritten in diffs on CI or on a non-Windows machine.
+* text=auto eol=lf
+
+# Binary assets must never be normalised.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary

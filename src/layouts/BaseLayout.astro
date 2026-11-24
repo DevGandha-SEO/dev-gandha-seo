@@ -1,0 +1,137 @@
+---
+/**
+ * The page shell: document scaffolding, header, footer and the motion runtime.
+ *
+ * Pages supply only their own content and an optional `seo` override — every
+ * structural concern is settled here, so a new page can never ship without a
+ * canonical tag, a skip link or the correct landmarks.
+ */
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+
+import SEO from '../components/seo/SEO.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import { SITE } from '../config/site';
+import type { SeoProps } from '../config/seo';
+
+interface Props {
+  seo?: SeoProps;
+}
+
+const { seo = {} } = Astro.props;
+---
+
+<!doctype html>
+<html lang={SITE.locale} class="no-js scroll-smooth">
+  <head>
+    <SEO {...seo} />
+    {/* Strip `no-js` before first paint so reveal elements are not briefly
+        forced visible on JS-capable browsers. Inline and synchronous on
+        purpose — a bundled module would run too late and cause a flash. */}
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </head>
+
+  <body class="bg-surface text-content antialiased">
+    <a
+      href="#main"
+      class="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-[100] focus-visible:rounded-full focus-visible:bg-navy-900 focus-visible:px-5 focus-visible:py-2.5 focus-visible:font-semibold focus-visible:text-white"
+    >
+      Skip to content
+    </a>
+
+    <Header />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      /**
+       * Scroll-reveal runtime.
+       *
+       * One shared IntersectionObserver for every `[data-reveal]` element —
+       * not one per element, which would be needless work on a long page.
+       * Each element is unobserved once shown, so the animation plays once and
+       * scrolling back up does not replay it.
+       */
+      const reveal = () => {
+        const nodes = document.querySelectorAll<HTMLElement>('[data-reveal]');
+        if (!nodes.length) return;
+
+        // Honour the OS-level motion preference: show everything immediately
+        // rather than animating. The CSS covers this too; doing it here as
+        // well means we never even register the observer.
+        const reduced = window.matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        ).matches;
+
+        if (reduced || !('IntersectionObserver' in window)) {
+          nodes.forEach((n) => n.classList.add('is-visible'));
+          return;
+        }
+
+        const show = (el: Element) => {
+          el.classList.add('is-visible');
+          observer.unobserve(el);
+          pending.delete(el);
+        };
+
+        const pending = new Set<Element>(nodes);
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) show(entry.target);
+            }
+          },
+          // Trigger slightly before the element's top edge arrives, so the
+          // transition is already underway by the time it is properly in view.
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+        );
+
+        nodes.forEach((n) => observer.observe(n));
+
+        /**
+         * Safety net for instant scroll jumps.
+         *
+         * An IntersectionObserver only fires when the intersection RATIO
+         * changes. If the viewport jumps instantly — landing on `/#services`,
+         * or the browser restoring scroll position on reload — an element can
+         * go from below the viewport to above it while its ratio stays 0 the
+         * whole way. No threshold is crossed, so the callback never runs and
+         * the element is stranded at opacity 0. Scroll back up and you are
+         * looking at blank space.
+         *
+         * This sweep reveals anything already at or past the viewport bottom.
+         * rAF-throttled, passive, and it unbinds itself once nothing is left,
+         * so the steady-state cost is zero.
+         */
+        let queued = false;
+        const sweep = () => {
+          queued = false;
+          for (const el of [...pending]) {
+            if (el.getBoundingClientRect().top < window.innerHeight) show(el);
+          }
+          if (!pending.size) window.removeEventListener('scroll', onScroll);
+        };
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(sweep);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        sweep();
+      };
+
+      reveal();
+      // Astro's view transitions swap the DOM without a full reload.
+      document.addEventListener('astro:after-swap', reveal);
+    </script>
+  </body>
+</html>

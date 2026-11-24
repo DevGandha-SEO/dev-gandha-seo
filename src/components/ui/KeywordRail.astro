@@ -1,0 +1,38 @@
+---
+/**
+ * Horizontal rail of keywords, spread edge to edge.
+ *
+ * Used by both the hero and the footer — which is precisely why it is a
+ * component and not a utility string duplicated in two places. The parenthesised
+ * entries in the data read as typographic asides; no special handling needed.
+ */
+interface Props {
+  items: readonly string[];
+  /** Thin rules above/below, as in the footer. */
+  bordered?: boolean;
+  class?: string;
+}
+
+const { items, bordered = false, class: className } = Astro.props;
+---
+
+<ul
+  role="list"
+  class:list={[
+    'flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs font-bold tracking-[0.18em] text-content-muted uppercase sm:text-sm',
+    bordered && 'border-y border-edge py-5',
+    className,
+  ]}
+>
+  {
+    items.map((item, i) => (
+      <li
+        data-reveal
+        style={`--reveal-delay:${i * 70}ms; --reveal-shift:0.75rem`}
+        class="transition-colors duration-300 hover:text-accent"
+      >
+        {item}
+      </li>
+    ))
+  }
+</ul>
