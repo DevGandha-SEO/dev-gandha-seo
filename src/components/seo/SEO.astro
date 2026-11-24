@@ -1,0 +1,93 @@
+---
+/**
+ * Every meta tag the site emits, in one component.
+ *
+ * Centralising this is the point: there is exactly one place to check what a
+ * crawler sees, and adding a page can never mean forgetting a canonical tag.
+ * Defaults come from src/config/seo.ts — edit values there, run `npm run build`,
+ * then read `dist/index.html` to see the rendered result.
+ */
+import {
+  SEO_DEFAULTS,
+  buildOrganizationSchema,
+  buildTitle,
+  resolveUrl,
+  type SeoProps,
+} from '../../config/seo';
+import { SITE } from '../../config/site';
+
+type Props = SeoProps;
+
+const {
+  title,
+  description = SEO_DEFAULTS.defaultDescription,
+  canonical,
+  ogImage = SEO_DEFAULTS.ogImage,
+  ogImageAlt = SEO_DEFAULTS.ogImageAlt,
+  ogType = 'website',
+  noindex = SEO_DEFAULTS.noindex,
+  rawTitle = false,
+} = Astro.props;
+
+/**
+ * `Astro.site` is the configured production origin; `Astro.url` is the URL of
+ * the page being rendered. Preferring `Astro.site` means canonical tags point
+ * at production even when building on a preview domain — which is what stops
+ * staging URLs leaking into the index.
+ */
+const base = Astro.site ?? Astro.url;
+const pageTitle = buildTitle(title, rawTitle);
+const canonicalUrl = canonical
+  ? resolveUrl(canonical, base)
+  : resolveUrl(Astro.url.pathname, base);
+const imageUrl = resolveUrl(ogImage, base);
+const schema = buildOrganizationSchema(base);
+---
+
+<!-- Core -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{pageTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Indexing. `max-image-preview:large` is what unlocks large thumbnails in
+     Google Discover and image-rich SERPs. -->
+<meta
+  name="robots"
+  content={noindex
+    ? 'noindex, nofollow'
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'}
+/>
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={SITE.locale} />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content={SEO_DEFAULTS.twitterCard} />
+<meta name="twitter:site" content={SEO_DEFAULTS.twitterSite} />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="twitter:image:alt" content={ogImageAlt} />
+
+<!-- Browser chrome -->
+<meta name="theme-color" content="#0a1a2f" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<!-- Structured data. Validate changes at https://validator.schema.org/ -->
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(schema)}
+/>

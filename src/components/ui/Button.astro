@@ -1,0 +1,84 @@
+---
+/**
+ * Button / link button.
+ *
+ * Renders an <a> when `href` is present and a <button> otherwise, so callers
+ * never pick the wrong element for the job. Variant and size styles live in
+ * lookup maps rather than inline conditionals — adding a variant is one entry,
+ * and every call site stays a single prop.
+ *
+ * Colours come from semantic tokens only, so a button inside a dark section
+ * recolours itself with no `dark:` variants.
+ */
+import Icon from './Icon.astro';
+import type { IconName, Size } from '../../types';
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'contrast';
+  size?: Size;
+  /** Trailing icon. Nudges right on hover. */
+  icon?: IconName;
+  external?: boolean;
+  type?: 'button' | 'submit';
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  external = false,
+  type = 'button',
+  class: className,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+
+const BASE =
+  'group inline-flex items-center justify-center gap-2 rounded-full font-semibold ' +
+  'whitespace-nowrap transition duration-300 ease-out-soft ' +
+  'motion-safe:hover:-translate-y-0.5 active:translate-y-0';
+
+const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
+  primary:
+    'bg-accent text-accent-contrast shadow-accent hover:bg-accent-hover hover:shadow-lift',
+  secondary:
+    'border border-edge-strong text-content hover:border-accent hover:text-accent hover:bg-accent-soft',
+  ghost: 'text-accent hover:bg-accent-soft',
+  /* For placing a button on a fixed-colour panel (e.g. the orange hero card),
+   * where `accent` would land orange-on-orange. Uses palette values directly
+   * because the panel's colour does not change with surface context. */
+  contrast: 'bg-navy-900 text-white hover:bg-navy-800 hover:shadow-lift',
+};
+
+const SIZES: Record<Size, string> = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-6 py-3 text-base',
+  lg: 'px-7 py-3.5 text-lead',
+};
+
+/** External links must carry noopener to avoid reverse-tabnabbing. */
+const externalAttrs = external
+  ? { target: '_blank', rel: 'noopener noreferrer' }
+  : {};
+---
+
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  class:list={[BASE, VARIANTS[variant], SIZES[size], className]}
+  {...externalAttrs}
+>
+  <slot />
+  {
+    icon && (
+      <Icon
+        name={icon}
+        size={18}
+        class="transition-transform duration-300 ease-out-soft motion-safe:group-hover:translate-x-1"
+      />
+    )
+  }
+</Tag>

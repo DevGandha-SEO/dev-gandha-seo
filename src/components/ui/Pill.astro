@@ -1,0 +1,28 @@
+---
+/**
+ * Small rounded badge used for statuses and card labels.
+ * Tone maps to a semantic token set so it adapts to its surface.
+ */
+interface Props {
+  tone?: 'accent' | 'surface' | 'outline';
+  class?: string;
+}
+
+const { tone = 'accent', class: className } = Astro.props;
+
+const TONES: Record<NonNullable<Props['tone']>, string> = {
+  accent: 'bg-accent text-accent-contrast',
+  surface: 'bg-surface-raised text-content shadow-card',
+  outline: 'border border-edge-strong text-content',
+};
+---
+
+<span
+  class:list={[
+    'inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase',
+    TONES[tone],
+    className,
+  ]}
+>
+  <slot />
+</span>

@@ -1,0 +1,35 @@
+---
+/**
+ * Full-bleed oversized brand wordmark.
+ *
+ * Appears twice — solid behind the hero card, ghosted behind the footer — so
+ * the sizing and tracking live here once. `aria-hidden` because it repeats the
+ * brand name already announced elsewhere; a screen reader hearing it twice is
+ * noise, not information.
+ */
+interface Props {
+  text: string;
+  variant?: 'solid' | 'ghost';
+  class?: string;
+}
+
+const { text, variant = 'solid', class: className } = Astro.props;
+
+const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
+  solid: 'text-content',
+  /* Low-opacity fill rather than text-stroke: strokes render inconsistently
+   * across browsers at this size and hairline out on high-DPI screens. */
+  ghost: 'text-content opacity-[0.07]',
+};
+---
+
+<p
+  aria-hidden="true"
+  class:list={[
+    'pointer-events-none text-center text-wordmark font-black whitespace-nowrap uppercase select-none',
+    VARIANTS[variant],
+    className,
+  ]}
+>
+  {text}
+</p>

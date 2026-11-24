@@ -1,16 +1,26 @@
 ---
+/**
+ * Homepage.
+ *
+ * Deliberately thin: it composes sections and declares its SEO, nothing more.
+ * All structure lives in BaseLayout, all copy in src/config/content.ts. Adding
+ * a section here is one import and one tag.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import Services from '../components/sections/Services.astro';
+import { SEO_DEFAULTS } from '../config/seo';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  seo={{
+    // The homepage title is already brand-complete, so skip the
+    // "%s | Dev Gandha" template rather than doubling the brand name.
+    title: SEO_DEFAULTS.defaultTitle,
+    rawTitle: true,
+    canonical: '/',
+  }}
+>
+  <Hero />
+  <Services />
+</BaseLayout>
