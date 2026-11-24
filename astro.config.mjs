@@ -12,7 +12,7 @@ export default defineConfig({
    * `<SEO />` uses it to build absolute canonical and Open Graph URLs. Keep it
    * in step with SITE.url in src/config/site.ts.
    */
-  site: 'https://devgandha.example.com',
+  site: 'https://trioxdigital.github.io',
 
   integrations: [sitemap()],
 

@@ -18,7 +18,7 @@ export const SITE = {
    * Must match `site` in astro.config.mjs — the sitemap and canonical URLs
    * are both derived from it.
    */
-  url: 'https://devgandha.example.com',
+  url: 'https://trioxdigital.github.io',
   /** Default language, emitted as <html lang> and in structured data. */
   locale: 'en',
   /** Contact details surfaced in the footer and structured data. */
